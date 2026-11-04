@@ -1,0 +1,25 @@
+/* Add files popup (UploadDialog.tsx). Theme tokens only; Uppy's own dashboard follows data-uppy-theme. */
+.up-back { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(8, 14, 26, .55); }
+.up-dialog { width: min(560px, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); outline: none; }
+.up-head { display: flex; align-items: center; justify-content: space-between; }
+.up-head h2 { margin: 0; font-size: 15px; }
+.up-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+.up-tab { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: -1px; }
+.up-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.up-tab:hover { color: var(--text); }
+.up-tab:focus-visible, .up-done:focus-visible, .up-pull button:focus-visible { outline: none; box-shadow: var(--focus); }
+.up-dash .uppy-Dashboard-inner { background: var(--surface-2); border-color: var(--border); border-radius: 12px; }
+.up-dash .uppy-Dashboard-dropFilesHereHint { border-color: var(--border-strong); }
+.up-pull { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.up-pull button { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); font: inherit; font-size: 12px; opacity: .6; cursor: not-allowed; }
+.up-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.up-count { font-size: 12px; color: var(--muted); }
+.up-done { height: 32px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.up-done:disabled { background: var(--surface-3); color: var(--faint); cursor: not-allowed; }
+
+/* "+ Add files" pill above the stepper. */
+.qw-add { flex: none; margin: 10px 10px 4px; }
+.qw-add-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; height: 36px; border: 1.5px dashed var(--accent); border-radius: 999px; background: var(--accent-soft); color: var(--accent); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.qw-add-btn:hover { background: var(--hover); }
+.qw-add-btn:focus-visible { outline: none; box-shadow: var(--focus); }
+.qw-add p { margin: 5px 4px 0; font-size: 11px; line-height: 1.35; text-align: center; color: var(--muted); }

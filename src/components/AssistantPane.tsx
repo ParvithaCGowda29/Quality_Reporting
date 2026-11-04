@@ -14,7 +14,7 @@ import { Icon, Tip, fmtBytes } from './ui'
 import Orb from './reactbits/Orb'
 
 /** Empty-state chips: shown until the first message, then gone. */
-export const STARTER_CHIPS = ['Make a reel for my offer', 'How did I do this week?', "Plan this month's posts", 'Audit my website']
+export const STARTER_CHIPS = ['Draft the PFD for part 1801EA300070N', 'Draft the PFMEA failure modes and ratings', 'Start an 8D for the INDIC complaint', 'What data is still missing for the PFMEA?']
 const HELPER = 'Nothing publishes or spends without your approval.'
 const attachmentReply = (names: string[]) => `I can't open ${names.length === 1 ? names[0] : `${names.length} files`} yet. Tell me what's in it, or what you'd like done with it.`
 

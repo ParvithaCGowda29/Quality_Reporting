@@ -15,7 +15,7 @@ export interface TaskState {
   fresh: number
 }
 
-let state: TaskState = { task: null, skill: 0, open: true, sub: null, step: null, fresh: 0 }
+let state: TaskState = { task: null, skill: 0, open: true, sub: 0, step: null, fresh: 0 }
 const subs = new Set<() => void>()
 const set = (p: Partial<TaskState>) => { state = { ...state, ...p }; subs.forEach(f => f()) }
 export const useTask = <T,>(pick: (s: TaskState) => T) =>
@@ -36,4 +36,7 @@ export function cancel() { if (state.task) set({ task: null, note: { id: Date.no
 export function newTask() { set({ task: null, step: null, fresh: state.fresh + 1 }) }
 
 export function pickSkill(i: number) { set(state.skill === i ? { open: !state.open } : { skill: i, open: true, sub: null, step: null }) }
+/** Stepper selection: opens the skill's context in the other panes. Never toggles, never starts work. */
+export function selectSkill(i: number) { if (state.skill !== i) set({ skill: i, open: true, sub: null, step: null }) }
+export function selectSub(i: number, j: number) { set({ skill: i, open: true, sub: j, step: null }) }
 export function pickSub(i: number) { set({ sub: state.sub === i ? null : i, step: null }) }

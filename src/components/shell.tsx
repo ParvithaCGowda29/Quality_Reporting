@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { setUi, useUi } from '../lib/store'
 import { signOut, switchToMasters, useSession } from '../features/login/session'
 import { SKILLS } from '../skills/skills.config.ts'
-import { newTask, pickSkill, pickSub, useTask } from '../skills/task'
+import { pickSkill, useTask } from '../skills/task'
 import StatusMark, { type StatusMarkStatus } from './reactbits/StatusMark'
 import './reactbits/reactbits.css'
 import './skills.css'
 import { Icon, Tip } from './ui'
 import { BrandLockup } from './BrandLockup'
+import { WorkflowStepper } from './WorkflowStepper'
 
 export function TopBar() {
   const theme = useUi(s => s.theme)
@@ -60,9 +61,9 @@ const LABEL: Record<StatusMarkStatus, string> = { pending: 'Idle', running: 'Wor
 const Ring = ({ status, size = 18 }: { status: StatusMarkStatus; size?: number }) =>
   <StatusMark className="rb-sm" status={status} size={size} strokeWidth={1.6} color="var(--accent)" doneColor="var(--ok)" errorColor="var(--err)" />
 
-/** SKILLS: the ten skills from skills.config.ts. The active skill opens its four subskills; the open subskill shows its steps. */
+/** QUALITY WORKFLOW: header (+ Task, collapse) over the stepper; stages come from skills.config.ts. */
 export function SkillsRail() {
-  const { skill, open, sub, step, task } = useTask(s => s)
+  const { skill, open, task } = useTask(s => s)
   const collapsed = useUi(s => s.shell.nav)
   const toggleRail = () => setUi(s => ({ shell: { ...s.shell, nav: !s.shell.nav } }))
   // The skill (and subskill) holding the current task shows it on its ring: working until approved, then a check.
@@ -71,7 +72,6 @@ export function SkillsRail() {
     if (!r || r.skill !== i || (j !== undefined && r.sub !== j)) return 'pending'
     return task.phase === 'approved' ? 'done' : 'running'
   }
-  const start = () => { newTask(); setUi({ drawer: null }) }
 
   if (collapsed) return (
     <nav className="shell-pane shell-rail" aria-label="Skills">
@@ -91,44 +91,12 @@ export function SkillsRail() {
   return (
     <nav className="shell-pane navrail sk-rail" aria-labelledby="nav-title">
       <header className="shell-head">
-        <h2 id="nav-title">Skills</h2>
+        <h2 id="nav-title">Quality workflow</h2>
         <span className="sk-head-actions">
-          <button className="sk-task" onClick={start}><Icon name="tb-plus" size={14} />Task</button>
           <button className="icon-btn sm" onClick={toggleRail} aria-expanded aria-label="Collapse skills" title="Collapse"><Icon name="panel-left" size={14} /></button>
         </span>
       </header>
-      <ul className="sk-list">
-        {SKILLS.map((s, i) => {
-          const isOpen = skill === i && open
-          return (
-            <li key={s.id} className={`sk-skill${skill === i ? ' on' : ''}`}>
-              <button className="sk-row" aria-expanded={isOpen} aria-controls={`sk-${s.id}`} onClick={() => { pickSkill(i); setUi({ drawer: null }) }}>
-                <Ring status={ringOf(i)} />
-                <span className="sk-name">{s.name}</span>
-                <span className="sk-count" aria-label={`${s.subskills.length} subskills`}>{s.subskills.length}</span>
-                <span className="sk-chev" aria-hidden><Icon name="chevron" size={12} /></span>
-                <span className="sr-only">, {LABEL[ringOf(i)]}</span>
-              </button>
-              {isOpen && <ul id={`sk-${s.id}`} className="sk-subs">
-                {s.subskills.map((ss, j) => (
-                  <li key={ss.name} className={`sk-sub${sub === j ? ' on' : ''}`}>
-                    <button className="sk-row sk-subrow" aria-expanded={sub === j} onClick={() => pickSub(j)}>
-                      <Ring status={ringOf(i, j)} size={15} />
-                      <span className="sk-name">{ss.name}</span>
-                      <span className="sk-chev" aria-hidden><Icon name="chevron" size={11} /></span>
-                    </button>
-                    {sub === j && <ul className="sk-steps">
-                      {ss.steps.map((st, k) => (
-                        <li key={st.name} className={step === k ? 'on' : undefined} title={st.description || undefined} aria-current={step === k ? 'step' : undefined}>{st.name}</li>
-                      ))}
-                    </ul>}
-                  </li>
-                ))}
-              </ul>}
-            </li>
-          )
-        })}
-      </ul>
+      <WorkflowStepper />
     </nav>
   )
 }

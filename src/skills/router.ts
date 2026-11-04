@@ -35,21 +35,18 @@ export const at = (r: Route): { skill: Skill; sub: Subskill; step: Step } =>
 
 /** One question per skill, asked once when a request is too short to act on. */
 export const QUESTION: Record<string, string> = {
-  audit: 'Which website and city should I look at?',
-  website: "What's the website address?",
-  seo: 'Which services and city do you want to rank for?',
-  content: 'Which offer is it for, and what should people do after watching or reading?',
-  ads: "What's the most you want to spend per day?",
-  social: 'Which platforms do you post on?',
-  brand: 'What is the business name, as customers search for it?',
-  mql: 'Where do your leads come in today: WhatsApp, forms or ads?',
-  crm: 'Which CRM do you use?',
-  reports: 'Which channels should I include: ads, social, SEO, or all of them?',
+  intake: 'Which part number and files should I load?',
+  pfd: 'Which part number (and revision) is the PFD for?',
+  pfmea: 'Which part number, and is the PFD approved?',
+  cp: 'Which part number, and is the PFMEA approved?',
+  '8d': 'Which customer complaint or internal failure is this for?',
+  approval: 'Which draft should go for approval?',
+  output: 'Which approved document should I export?',
 }
-export const UNROUTED = 'What would you like done: a reel or post, ads, SEO, a website fix, leads, or a report?'
+export const UNROUTED = 'What would you like done: load data, a PFD, PFMEA, Control Plan, 8D, an approval, or an export?'
 export const NO_MATCH = "I couldn't match that to a skill yet. Pick one on the left, or say it another way."
-export const APPROVED = 'Approved. Nothing has been published or spent: no publishing, ad or analytics account is connected yet, so the approved plan waits in Results & edits.'
-export const CANCELLED = 'Cancelled. Nothing was published or spent.'
+export const APPROVED = 'Approved. Nothing has been released: no document store or approval gate is connected yet, so the approved plan waits in Results & edits.'
+export const CANCELLED = 'Cancelled. Nothing was released.'
 
 export function readBack(t: Task): string {
   const { skill, sub, step } = at(t.route!)
@@ -58,7 +55,7 @@ export function readBack(t: Task): string {
     `• Skill: ${skill.name} › ${sub.name}`,
     `• Starts with: ${step.name}${step.description ? ` - ${step.description}` : ''}`,
     `• Your request: "${t.request}"${t.answer ? ` (${t.answer})` : ''}`,
-    'Nothing publishes or spends until you approve. Approve it in Results & edits, or tell me what to change.',
+    'Nothing is released until you approve. Approve it in Results & edits, or tell me what to change.',
   ].join('\n')
 }
 
