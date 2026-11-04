@@ -6,7 +6,7 @@
 // "+" attaches files to the chat only.
 import './assistant.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ActionBarMorePrimitive, ActionBarPrimitive, AssistantRuntimeProvider, AttachmentPrimitive, AuiIf, ComposerPrimitive, MessagePartPrimitive, MessagePrimitive, ThreadPrimitive, WebSpeechSynthesisAdapter, useAuiState, useLocalRuntime, type AttachmentAdapter, type ChatModelAdapter } from '@assistant-ui/react'
+import { ActionBarPrimitive, AssistantRuntimeProvider, AttachmentPrimitive, AuiIf, ComposerPrimitive, MessagePartPrimitive, MessagePrimitive, ThreadPrimitive, useAuiState, useLocalRuntime, type AttachmentAdapter, type ChatModelAdapter } from '@assistant-ui/react'
 import { createDictation, fmtClock, stopDictation, useDictate } from './dictation'
 import { setUi, useUi } from '../lib/store'
 import { sendToRouter, useTask } from '../skills/task'
@@ -19,7 +19,6 @@ const HELPER = 'Nothing publishes or spends without your approval.'
 const attachmentReply = (names: string[]) => `I can't open ${names.length === 1 ? names[0] : `${names.length} files`} yet. Tell me what's in it, or what you'd like done with it.`
 
 const dictation = createDictation()
-const speech = typeof speechSynthesis !== 'undefined' ? new WebSpeechSynthesisAdapter() : undefined
 // Chat attachments stay in the thread; nothing is uploaded.
 const chatFiles: AttachmentAdapter = {
   accept: '*',
@@ -27,8 +26,6 @@ const chatFiles: AttachmentAdapter = {
   async send(a) { return { ...a, status: { type: 'complete' }, content: [] } },
   async remove() {},
 }
-// ponytail: no feedback service; thumbs live on the message only (assistant-ui metadata). Wire submit when one exists.
-const feedback = { submit: () => {} }
 
 export function AssistantPane() {
   const collapsed = useUi(s => s.shell.assistant)
@@ -50,7 +47,7 @@ export function AssistantPane() {
       }
     },
   }), [])
-  const runtime = useLocalRuntime(adapter, { adapters: { attachments: chatFiles, feedback, ...(dictation && { dictation }), ...(speech && { speech }) } })
+  const runtime = useLocalRuntime(adapter, { adapters: { attachments: chatFiles, ...(dictation && { dictation }) } })
   // Approve / Cancel in Results & edits answer in the thread, once per action.
   const posted = useRef(0)
   useEffect(() => {
@@ -122,7 +119,7 @@ function ThreadBody() {
 
 // Style-guide blues only: the accent, a light tint of it (the swirl blends these two, so it must differ enough to read),
 // and a shadow tone. The Orb parses colour strings, not CSS vars.
-const ORB = { light: { colors: ['#3D66DB', '#A9BFF5', '#C5D0E1'], background: '#FFFFFF' }, dark: { colors: ['#5B83F2', '#9DB6F7', '#142540'], background: '#101E32' } }
+const ORB = { light: { colors: ['#008CA8', '#9AD6E3', '#C5D0E1'], background: '#FFFFFF' }, dark: { colors: ['#008CA8', '#8FD3E0', '#142540'], background: '#101E32' } }
 /** The idle-assistant Orb above the greeting: slow, low hover lean, dimmed (in CSS: its own opacity greys a light background). */
 function IdleOrb({ paused }: { paused?: boolean }) {
   const o = ORB[useUi(s => s.theme)]
@@ -130,9 +127,12 @@ function IdleOrb({ paused }: { paused?: boolean }) {
     size={1} rotateOnHover={false} clickPulse={false} intro={!paused} paused={paused} /></div>
 }
 
-/** Attachment cards, the rounded composer (+ · input · mic · Send / Stop), then the suggestion chips. */
+/** Attachment cards, with the suggestion chips above the rounded composer (+ · input · mic · Send / Stop). */
 function Composer({ chips }: { chips: string[] }) {
   return <div className="as-compose">
+    {chips.length > 0 && <div className="as-sugs" aria-label="Suggestions">
+      {chips.map(c => <ThreadPrimitive.Suggestion key={c} className="as-sug" prompt={c} send>{c}</ThreadPrimitive.Suggestion>)}
+    </div>}
     <AuiIf condition={s => s.composer.attachments.length > 0}>
       <div className="as-files"><ComposerPrimitive.Attachments components={{ Attachment: ChatFile }} /></div>
     </AuiIf>
@@ -155,9 +155,6 @@ function Composer({ chips }: { chips: string[] }) {
       </AuiIf>
     </ComposerPrimitive.Root>
     {dictation && <DictateNote />}
-    {chips.length > 0 && <div className="as-sugs" aria-label="Suggestions">
-      {chips.map(c => <ThreadPrimitive.Suggestion key={c} className="as-sug" prompt={c} send>{c}</ThreadPrimitive.Suggestion>)}
-    </div>}
   </div>
 }
 
@@ -247,24 +244,6 @@ function EditComposer() {
 /** Reply text with a blinking caret while it streams (assistant-ui's in-progress slot). */
 const ReplyText = () => <p><MessagePartPrimitive.Text /><MessagePartPrimitive.InProgress><span className="as-caret" aria-hidden /></MessagePartPrimitive.InProgress></p>
 const Generating = () => <span className="as-gen" role="status"><span className="as-dots" aria-hidden><i /><i /><i /></span>Assistant is generating...</span>
-/** Always visible (not on hover): copy, thumbs up / down, more. No regenerate: the router keeps state, so a rerun would answer twice. */
-function ReplyActions() {
-  return <ActionBarPrimitive.Root className="as-actions" autohide="never">
-    <ActionBarPrimitive.Copy className="as-ibtn" aria-label="Copy">
-      <AuiIf condition={s => s.message.isCopied}><Icon name="tb-check" size={16} /></AuiIf>
-      <AuiIf condition={s => !s.message.isCopied}><Icon name="tb-copy" size={16} /></AuiIf>
-    </ActionBarPrimitive.Copy>
-    <ActionBarPrimitive.FeedbackPositive className="as-ibtn" aria-label="Good reply"><Icon name="tb-thumb-up" size={16} /></ActionBarPrimitive.FeedbackPositive>
-    <ActionBarPrimitive.FeedbackNegative className="as-ibtn" aria-label="Bad reply"><Icon name="tb-thumb-down" size={16} /></ActionBarPrimitive.FeedbackNegative>
-    <ActionBarMorePrimitive.Root>
-      <ActionBarMorePrimitive.Trigger className="as-ibtn" aria-label="More actions"><Icon name="tb-dots" size={16} /></ActionBarMorePrimitive.Trigger>
-      <ActionBarMorePrimitive.Content className="as-more" align="start" sideOffset={4}>
-        {speech && <ActionBarMorePrimitive.Item asChild><ActionBarPrimitive.Speak className="as-more-item">Read aloud</ActionBarPrimitive.Speak></ActionBarMorePrimitive.Item>}
-        <ActionBarMorePrimitive.Item asChild><ActionBarPrimitive.ExportMarkdown className="as-more-item">Download as Markdown</ActionBarPrimitive.ExportMarkdown></ActionBarMorePrimitive.Item>
-      </ActionBarMorePrimitive.Content>
-    </ActionBarMorePrimitive.Root>
-  </ActionBarPrimitive.Root>
-}
 function AssistantMessage() {
   const status = useAuiState(({ message }) => message.status?.type)
   const empty = useAuiState(({ message }) => !message.content.some(p => p.type === 'text' && p.text))
@@ -274,7 +253,7 @@ function AssistantMessage() {
   if (running && empty) return <MessagePrimitive.Root className="as-arow">{avatar}<div className="as-abody"><Generating /></div></MessagePrimitive.Root>
   return <MessagePrimitive.Root className="as-arow">{avatar}<div className="as-abody">
     <div className="as-msg as-bot"><MessagePrimitive.Parts components={{ Text: ReplyText }} /></div>
-    {running ? <Generating /> : <ReplyActions />}
+    {running && <Generating />}
     {isLast && !running && <p className="as-helper">{HELPER}</p>}
   </div></MessagePrimitive.Root>
 }

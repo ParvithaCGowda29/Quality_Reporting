@@ -14,19 +14,19 @@ const steps = (lines: string[]): Step[] => lines.map(l => {
 })
 
 export const SKILLS: Skill[] = [
-  { id: 'intake', name: 'Data Intake', icon: 'tb-database-import', keywords: ['upload', 'load', 'files', 'file', 'missing', 'data', 'intake', 'part', 'revision', 'sharepoint'], subskills: [
-    { name: 'Upload', steps: steps([
+  { id: 'intake', name: 'Data Intake', icon: 'tb-inbox', keywords: ['upload', 'load', 'files', 'file', 'missing', 'data', 'intake', 'part', 'revision', 'sharepoint'], subskills: [
+    { name: 'Document Ingestion', steps: steps([
       'Receive upload by browser / email / SharePoint watch',
       'Virus-scan every file before storage',
       'Store and index for retrieval (Cognee, admin masters, S3, database)',
     ]) },
-    { name: 'Standardize', steps: steps([
-      'Record part number, revision, customer-specific requirements and applicable standards',
-    ]) },
-    { name: 'Parse', steps: steps([
+    { name: 'Process Data Capture', steps: steps([
       'Extract process steps, existing PFMEA / Control Plan content and complaint records into structured fields',
     ]) },
-    { name: 'Review', steps: steps([
+    { name: 'Part and customer context', steps: steps([
+      'Record part number, revision, customer-specific requirements and applicable standards',
+    ]) },
+    { name: 'Missing-Data Check', steps: steps([
       'Run missing-data checklist; halt and notify the quality manager on gaps',
     ]) },
   ] },
@@ -41,7 +41,7 @@ export const SKILLS: Skill[] = [
       'Fill the Innotech PFD template and produce the draft PFD',
     ]) },
   ] },
-  { id: 'pfmea', name: 'PFMEA Generation', icon: 'tb-alert-circle', keywords: ['pfmea', 'fmea', 'failure', 'risk', 'severity', 'occurrence', 'detection', 'rating', 'iatf', 'aiag', 'vda', 'priority'], subskills: [
+  { id: 'pfmea', name: 'PFMEA Generation', icon: 'tb-alert-triangle', keywords: ['pfmea', 'fmea', 'failure', 'risk', 'severity', 'occurrence', 'detection', 'rating', 'iatf', 'aiag', 'vda', 'priority'], subskills: [
     { name: 'Structure and function', steps: steps([
       'Build one row group per PFD operation - process item, step, work element, function and requirement',
     ]) },
@@ -55,7 +55,7 @@ export const SKILLS: Skill[] = [
       'Collect S/O/D from the cross-functional team; compute Action Priority (H/M/L) per AIAG-VDA handbook; recommend actions for high-priority items',
     ]) },
   ] },
-  { id: 'cp', name: 'Control Plan Generation', icon: 'tb-list-check', keywords: ['control', 'cp', 'reaction', 'inspection', 'sample', 'frequency', 'characteristic', 'consistency'], subskills: [
+  { id: 'cp', name: 'Control Plan Generation', icon: 'tb-clipboard-check', keywords: ['control', 'cp', 'reaction', 'inspection', 'sample', 'frequency', 'characteristic', 'consistency'], subskills: [
     { name: 'PFMEA to Control Plan mapping', steps: steps([
       'Map every PFMEA failure mode and PFD step to a Control Plan row',
     ]) },
@@ -83,7 +83,7 @@ export const SKILLS: Skill[] = [
       'Team recognition; produce the customer-facing 8D report',
     ]) },
   ] },
-  { id: 'approval', name: 'Human Approval', icon: 'tb-shield-check', keywords: ['approve', 'approval', 'review', 'reject', 'return', 'sign', 'engineer', 'qe'], subskills: [
+  { id: 'approval', name: 'Human Approval', icon: 'tb-user-check', keywords: ['approve', 'approval', 'review', 'reject', 'return', 'sign', 'engineer', 'qe'], subskills: [
     { name: 'Quality engineer review', steps: steps([
       'Route every draft to the Quality Engineer for review',
     ]) },

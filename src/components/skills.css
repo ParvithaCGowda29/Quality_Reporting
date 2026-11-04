@@ -1,9 +1,6 @@
 /* SKILLS accordion rail (SkillsRail in shell.tsx). Tokens only. */
 .sk-head-actions { display: inline-flex; align-items: center; gap: 6px; }
-.sk-task { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px 0 9px; border: 0; border-radius: 999px;
-  background: var(--accent); color: var(--accent-ink); font-size: 12.5px; font-weight: 600; cursor: pointer; }
-.sk-task:hover { filter: brightness(1.08); }
-.sk-task:focus-visible, .sk-row:focus-visible { outline: none; box-shadow: var(--focus); }
+.sk-row:focus-visible { outline: none; box-shadow: var(--focus); }
 
 .sk-list { list-style: none; margin: 0; padding: 10px; flex: 1; min-height: 0; overflow: auto; scrollbar-gutter: stable; display: flex; flex-direction: column; gap: 2px; }
 .sk-list ul { list-style: none; margin: 0; padding: 0; }

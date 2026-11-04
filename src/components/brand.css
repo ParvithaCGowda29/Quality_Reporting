@@ -1,10 +1,12 @@
-/* BrandLockup: the BuLLMaps wordmark, with an optional muted tag beside it (top bar: "marketing workflows").
+/* BrandLockup: the BuLLMaps wordmark, with an optional muted tag beside it (top bar: "Quality Reporting").
    `--bl` is the wordmark size; the tag is em of it. "LLMaps" is the logo blue, lighter in dark mode. */
-.brand-lockup { --bl: 28px; display: inline-flex; align-items: baseline; gap: .4em; font-size: var(--bl); line-height: 1; }
+.brand-lockup { --bl: 28px; display: inline-flex; align-items: center; gap: .4em; font-size: var(--bl); line-height: 1; }
+.brand-lockup .brand-logo { display: block; height: 2.2em; width: auto; border-radius: 8px; background: #fff; } /* exact artwork incl. tagline; white tile keeps it legible in dark theme */
 .brand-lockup .brand-mark { font-size: 1em; font-weight: 800; letter-spacing: -.01em; line-height: 1; white-space: nowrap; color: var(--text); }
 .brand-lockup .brand-bu { color: #FF9800; }
-.brand-lockup .brand-llm { color: #0084C2; }
-:root:not([data-theme="light"]) .brand-lockup .brand-llm { color: #4FB2E8; }
+.brand-lockup .brand-llm { color: #008CA8; }
+:root:not([data-theme="light"]) .brand-lockup .brand-llm { color: #008CA8; }
 .brand-lockup .brand-tag { font-size: max(.43em, 12px); font-weight: 500; white-space: nowrap; color: var(--muted); }
+.topbar .brand-lockup { --bl: 18px; }
 /* Narrow top bar: the wordmark alone at its compact size. */
-@media (max-width: 860px) { .topbar .brand-lockup { --bl: 17px; } .topbar .brand-lockup .brand-tag { display: none; } }
+@media (max-width: 860px) { .topbar .brand-lockup { --bl: 15px; } .topbar .brand-lockup .brand-tag { display: none; } }

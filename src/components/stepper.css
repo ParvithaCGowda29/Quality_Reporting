@@ -3,19 +3,6 @@
 .qw button:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* Context card: always visible above the scrolling list. */
-.qw-ctx { flex: none; margin: 10px 10px 4px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 12px; line-height: 1.4; }
-.qw-ctx p { margin: 3px 0 0; overflow-wrap: anywhere; }
-.qw-ctx-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.qw-ctx-row strong { font-size: 13px; }
-.qw-part { font-weight: 600; }
-.qw-desc { color: var(--muted); }
-.qw-next { color: var(--muted); } .qw-next span { color: var(--text); font-weight: 600; }
-.qw-empty { margin: 0 !important; color: var(--muted); }
-.qw-chip { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--surface-3); color: var(--muted); }
-.qw-chip.s-waiting-input, .qw-chip.s-waiting-approval { background: var(--warn-soft); color: var(--warn); }
-.qw-chip.s-approved, .qw-chip.s-complete { background: var(--ok-soft); color: var(--ok); }
-.qw-chip.s-blocked, .qw-chip.s-failed { background: var(--err-soft); color: var(--err); }
-.qw-chip.s-running { background: var(--info-soft); color: var(--info); }
 
 .qw-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 10px 10px; scrollbar-gutter: stable; }
 .qw-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -66,9 +53,6 @@
 .qw-sub.on .qw-sub-t b, .qw-sub.on .qw-note { color: inherit; opacity: .85; }
 .qw-note { font-size: 11px; font-weight: 400; color: var(--muted); }
 .qw-right { flex: none; margin-left: auto; white-space: nowrap; }
-.qw-gate { display: flex; gap: 6px; margin: 6px 10px 8px; padding: 6px 8px; border-radius: 8px; background: var(--warn-soft); color: var(--text); font-size: 11.5px; line-height: 1.35; }
-.qw-body .qw-gate { margin: 8px 0 0; }
-.qw-gate .icon { flex: none; margin-top: 2px; color: var(--warn); }
 
 .qw-branch-head { margin: 12px 0 8px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 
@@ -77,3 +61,53 @@
 .qw-alongside { font-style: italic; }
 
 @media (prefers-reduced-motion: reduce) { .qw-chev .icon, .qw-collapse, .qw-body { transition: none; } .qw .icon.spin { animation: none; } }
+
+/* ---- Left pane restyle: vertical progress rail, pill, teal accent (scoped to .qw; light + dark) ---- */
+.qw { --teal: #008CA8; --teal-ink: #062226; --teal-soft: rgba(0, 140, 168, .16); --dot: #008CA8; }
+:root[data-theme="light"] .qw { --teal: #008CA8; --teal-ink: #fff; --teal-soft: rgba(0, 140, 168, .13); }
+
+
+.qw-add { flex: none; padding: 10px 12px 4px; text-align: center; }
+.qw-add-btn { width: 100%; height: 40px; border: 0; border-radius: 999px; background: var(--teal-soft); color: var(--teal); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.qw-add-btn:hover { background: color-mix(in srgb, var(--teal) 22%, transparent); }
+.qw-add p { margin: 6px 0 0; font-size: 11px; color: var(--muted); }
+
+/* Rail: a thin line behind circular outline icons. */
+.qw-rail { gap: 0; }
+.qw-rail > .qw-acc { position: relative; border: 0; border-radius: 0; background: none; overflow: visible; }
+.qw-rail > .qw-acc::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.qw-rail > .qw-acc:first-child::before { top: 24px; }
+.qw-rail > .qw-acc:last-child::before { bottom: auto; height: 24px; }
+.qw-rail .qw-head { position: relative; padding: 8px 10px; border-radius: 10px; }
+.qw-rail .qw-acc.open > .qw-head { background: none; }
+.qw-rail .qw-acc.open .qw-name { color: var(--text); }
+.qw-ico { position: relative; z-index: 1; flex: none; display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--muted); }
+.qw-ico.sel { border-color: var(--teal); color: var(--teal); background: var(--teal-soft); }
+.qw-ico.sel::after { content: ''; position: absolute; top: -1px; right: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px var(--surface); }
+.qw-ico.s-complete, .qw-ico.s-approved { border-color: var(--ok); color: var(--ok); }
+.qw-ico.s-failed, .qw-ico.s-blocked { border-color: var(--err); color: var(--err); }
+.qw-ico b { position: absolute; font-size: 10px; line-height: 1; }
+.qw-rail .qw-line.s-running { color: var(--teal); }
+.qw-lock { flex: none; display: grid; place-items: center; color: var(--muted); }
+
+/* Expanded skill: sub-steps indented under the rail; the selected one is a full-width teal pill. */
+.qw-rail .qw-body { padding: 0 0 0 40px; }
+.qw-rail .qw-acc.open .qw-body { padding-bottom: 6px; }
+.qw-rail .qw-count { display: none; }
+.qw-rail .qw-sub { align-items: center; padding: 7px 12px; }
+.qw-subico { flex: none; display: grid; place-items: center; color: var(--muted); }
+.qw-sub.on, .qw-sub.on:hover { background: var(--teal); color: var(--teal-ink); }
+.qw-sub.on .qw-subico { color: inherit; }
+
+/* 8D: conditional card. */
+.qw-acc.branch { border-style: solid; }
+.qw-acc.branch .qw-ico { border-color: var(--border-strong); }
+.qw-branch-head { border-top: 0; padding-top: 0; font-size: 10.5px; letter-spacing: .08em; }
+
+.qw-flow { align-items: center; text-align: center; border-top: 1px solid var(--border); font-size: 11px; }
+
+/* 8D: description card. Fixed, portalled to body, solid surface (white in light, dark panel in dark), above everything. */
+.qw-tip { position: fixed; z-index: 2147483000; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgba(0, 0, 0, .22); font-size: 12px; line-height: 1.45; text-align: left;
+  overflow-wrap: anywhere; pointer-events: none; opacity: 1; }
+.qw-tip .tip-note { display: block; margin-top: 4px; color: var(--muted); }

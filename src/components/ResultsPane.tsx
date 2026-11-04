@@ -12,7 +12,7 @@ import { at, type Task } from '../skills/router.ts'
 import { approve, cancel, useTask } from '../skills/task'
 
 // Shiny Text parses colour strings (CSS vars do not parse): text token with a soft accent sheen, per theme.
-const SHINE = { light: { color: '#0F1B2D', shine: '#3D66DB' }, dark: { color: '#E6EDF7', shine: '#5B83F2' } }
+const SHINE = { light: { color: '#0F1B2D', shine: '#008CA8' }, dark: { color: '#E6EDF7', shine: '#008CA8' } }
 
 function Waiting({ leaving }: { leaving?: boolean }) {
   const s = SHINE[useUi(u => u.theme)]

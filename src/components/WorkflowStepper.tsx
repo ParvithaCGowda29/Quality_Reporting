@@ -2,6 +2,7 @@
 // conditional 8D card. Reads the real task; statuses are never invented or timed.
 // Selection (store.skill/sub), expansion (local) and status (from the task) are separate things.
 import { useEffect, useState, type KeyboardEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { SKILLS } from '../skills/skills.config.ts'
 import { BRANCH, FLOW, MAIN_PATH, STATUS_LABEL, idleLine, modelFromTask, subSummary, type Model, type StageMeta, type StageStatus } from '../skills/stages.ts'
 import { PREVIEW } from '../skills/stages.preview.ts'
@@ -21,6 +22,9 @@ const openable = (id?: string) => MAIN_PATH.some(m => m.id === id && !m.locked)
 const Node = ({ s, size = 24 }: { s: StageStatus; size?: number }) =>
   <span className={`qw-node s-${s}`} style={{ width: size, height: size }} aria-hidden><Icon name={ICON[s]} size={size * 0.58} spin={s === 'running'} stroke={2} /></span>
 
+// Skill circles on the rail carry the skill's own icon; status shows through colour (qw-node classes) and the line below.
+const SUB_ICON: Record<string, string> = { 'Document Ingestion': 'tb-upload', 'Process Data Capture': 'tb-file-code', 'Part and customer context': 'tb-transform', 'Missing-Data Check': 'tb-search' }
+
 export function WorkflowStepper() {
   const { skill, sub, task } = useTask(s => s)
   const model: Model = preview ? PREVIEW : modelFromTask(task, IDS)
@@ -30,6 +34,14 @@ export function WorkflowStepper() {
   // The single open card (1-6). The 8D card has its own independent state.
   const [expanded, setExpanded] = useState<string | null>(openable(selectedId) ? selectedId : 'intake')
   const [branchOpen, setBranchOpen] = useState(false)
+  // 8D description: a solid card, fixed-position (so nothing in the rail resizes), inside the rail's width, below the card
+  // (above it when the bottom of the window is too close).
+  const [tip, setTip] = useState<{ left: number; width: number; top?: number; bottom?: number } | null>(null)
+  const tipShow = (e: { currentTarget: HTMLElement }) => {
+    const r = e.currentTarget.getBoundingClientRect(), pane = e.currentTarget.closest('.qw')!.getBoundingClientRect()
+    const below = window.innerHeight - r.bottom > 130
+    setTip({ left: pane.left + 10, width: pane.width - 20, ...(below ? { top: r.bottom + 6 } : { bottom: window.innerHeight - r.top + 6 }) })
+  }
   useEffect(() => { if (openable(selectedId)) setExpanded(selectedId) }, [selectedId])
 
   // Up/Down move between card headers and sub-skills; Tab still works as usual.
@@ -47,7 +59,7 @@ export function WorkflowStepper() {
     const status = v?.status ?? 'not-started'
     const isSel = selectedId === m.id
     const isOpen = !m.locked && (branch ? branchOpen : expanded === m.id)
-    const line = v?.label ?? idleLine(m, sk.subskills.length)
+    const line = v?.label ?? idleLine(m)
     const toggle = () => {
       selectSkill(i) // shows its context in the other panes; never starts work
       if (m.locked) return
@@ -57,17 +69,21 @@ export function WorkflowStepper() {
     return (
       <li key={m.id} className={`qw-acc${isOpen ? ' open' : ''}${isSel ? ' sel' : ''}${branch ? ' branch' : ''}${m.locked ? ' locked' : ''}`}>
         <button type="button" className="qw-head" data-qw aria-expanded={m.locked ? undefined : isOpen} aria-controls={m.locked ? undefined : `qw-${m.id}`}
-          aria-current={isSel ? 'true' : undefined} aria-disabled={m.locked || undefined} onClick={toggle}>
-          {v && <Node s={status} size={20} />}
-          <span className="qw-head-t">
-            <span className="qw-name">{branch ? '' : `${n}. `}{sk.name}{branch && <span className="qw-badge">Conditional</span>}</span>
-            <span className={`qw-line s-${status}`}>{line}</span>
-            {branch && <span className="qw-line">Can propose PFMEA / Control Plan updates.</span>}
+          aria-current={isSel ? 'true' : undefined} aria-disabled={m.locked || undefined} onClick={toggle}
+          {...(branch && { 'aria-describedby': 'qw-tip', onMouseEnter: tipShow, onMouseLeave: () => setTip(null), onFocus: tipShow, onBlur: () => setTip(null) })}>
+          <span className={`qw-ico s-${status}${isSel ? ' sel' : ''}`} aria-hidden>
+            <Icon name={branch ? 'tb-hexagon' : sk.icon} size={branch ? 22 : 16} stroke={1.8} />{branch && <b>8</b>}
           </span>
-          {m.locked && <Icon name="lock" size={13} />}
-          <span className="qw-chev"><Icon name="chevron" size={12} /></span>
+          <span className="qw-head-t">
+            <span className="qw-name">{branch ? '' : `${n} `}{sk.name}{branch && <span className="qw-badge">Conditional</span>}</span>
+            {!(branch && !v) && <span className={`qw-line s-${status}`}>{line}</span>}
+          </span>
+          {m.locked ? <span className="qw-lock"><Icon name="lock" size={14} /></span> : <span className="qw-chev"><Icon name="chevron" size={12} /></span>}
         </button>
-        {m.gate && status === 'waiting-approval' && <p className="qw-gate"><Icon name="shield" size={12} /><span><b>Human gate:</b> {m.gate}</span></p>}
+        {branch && tip && createPortal(
+          <div id="qw-tip" role="tooltip" className="qw-tip" style={tip}>
+            {m.needs}<span className="tip-note">Can propose PFMEA / Control Plan updates.</span>
+          </div>, document.body)}
         {!m.locked && (
           <div className="qw-collapse">
             <div id={`qw-${m.id}`} className="qw-body" inert={!isOpen}>
@@ -81,8 +97,8 @@ export function WorkflowStepper() {
                   return (
                     <li key={ss.name}>
                       <button type="button" className={`qw-sub${on ? ' on' : ''}`} data-qw aria-current={on ? 'true' : undefined} onClick={() => selectSub(i, j)}>
-                        {ssS === 'not-started' ? <span className="qw-dot" aria-hidden /> : <Node s={ssS} size={16} />}
-                        <span className="qw-sub-t"><span><b>{i + 1}.{j + 1}</b> {ss.name}<span className="sr-only">, {STATUS_LABEL[ssS]}</span></span>
+                        {ssS === 'not-started' ? <span className="qw-subico" aria-hidden><Icon name={SUB_ICON[ss.name] ?? 'circle'} size={14} /></span> : <Node s={ssS} size={16} />}
+                        <span className="qw-sub-t"><span>{ss.name}<span className="sr-only">, {STATUS_LABEL[ssS]}</span></span>
                           {note && !right && <span className="qw-note">{note}</span>}</span>
                         {note && right && <span className="qw-note qw-right">{note}</span>}
                       </button>
@@ -90,7 +106,6 @@ export function WorkflowStepper() {
                   )
                 })}
               </ol>
-              {m.gate && <p className="qw-gate"><Icon name="shield" size={12} /><span><b>Human gate:</b> {m.gate}</span></p>}
             </div>
           </div>
         )}
@@ -98,36 +113,19 @@ export function WorkflowStepper() {
     )
   }
 
-  const c = model.ctx
   return (
     <div className="qw" onKeyDown={onKey}>
-      <section className="qw-ctx" aria-label="Current workflow">
-        {c ? (
-          <>
-            <div className="qw-ctx-row">
-              <strong>{c.type ?? 'Workflow'}</strong>
-              {c.status && <span className={`qw-chip s-${c.status}`}>{c.statusLabel ?? STATUS_LABEL[c.status]}</span>}
-            </div>
-            {(c.part || c.rev) && <p className="qw-part">{[c.part, c.rev && `Rev ${c.rev}`].filter(Boolean).join(' · ')}</p>}
-            {c.desc && <p className="qw-desc">{c.desc}</p>}
-            {c.next && <p className="qw-next"><span>Next:</span> {c.next}</p>}
-          </>
-        ) : <p className="qw-empty">Select or create a task to track progress</p>}
-      </section>
       <div className="qw-add">
-        <button type="button" className="qw-add-btn" onClick={() => setAdding(true)}><Icon name="plus" size={14} />Add files{files ? ` (${files})` : ''}</button>
+        <button type="button" className="qw-add-btn" onClick={() => setAdding(true)}>+ Add files{files ? ` (${files})` : ''}</button>
         <p>PDF, DOCX, XLSX, PPTX, TXT, PNG and ZIP archives</p>
       </div>
       {adding && <UploadDialog onClose={() => setAdding(false)} />}
       <div className="qw-scroll">
-        <ol className="qw-list" aria-label="Skills">{MAIN_PATH.map((m, n) => card(m, n + 1))}</ol>
+        <ol className="qw-list qw-rail" aria-label="Skills">{MAIN_PATH.map((m, n) => card(m, n + 1))}</ol>
         <div className="qw-branch-head"><span>When a quality issue occurs</span></div>
         <ol className="qw-list" aria-label="Conditional path">{BRANCH.map(m => card(m, 0, true))}</ol>
       </div>
-      <footer className="qw-flow" aria-label="Main flow">
-        <span>{FLOW.join(' > ')}</span>
-        <span className="qw-alongside">8D runs alongside</span>
-      </footer>
+      <footer className="qw-flow" aria-label="Main flow">{FLOW.join(' > ')}</footer>
     </div>
   )
 }

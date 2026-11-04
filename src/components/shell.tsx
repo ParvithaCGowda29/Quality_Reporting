@@ -16,7 +16,7 @@ export function TopBar() {
     <header className="topbar">
       <div className="brand">
         <button className="icon-btn nav-drawer-btn" onClick={() => setUi(s => ({ drawer: s.drawer === 'nav' ? null : 'nav' }))} aria-label="Open skills" title="Skills"><Icon name="menu" /></button>
-        <BrandLockup tag="marketing workflows" />
+        <BrandLockup tag="Quality Reporting" />
       </div>
       <div className="topbar-right">
         <button className="icon-btn" aria-pressed={theme === 'light'} onClick={() => setUi({ theme: theme === 'dark' ? 'light' : 'dark' })}
@@ -61,7 +61,7 @@ const LABEL: Record<StatusMarkStatus, string> = { pending: 'Idle', running: 'Wor
 const Ring = ({ status, size = 18 }: { status: StatusMarkStatus; size?: number }) =>
   <StatusMark className="rb-sm" status={status} size={size} strokeWidth={1.6} color="var(--accent)" doneColor="var(--ok)" errorColor="var(--err)" />
 
-/** QUALITY WORKFLOW: header (+ Task, collapse) over the stepper; stages come from skills.config.ts. */
+/** QUALITY WORKFLOW: header (collapse) over the stepper; stages come from skills.config.ts. */
 export function SkillsRail() {
   const { skill, open, task } = useTask(s => s)
   const collapsed = useUi(s => s.shell.nav)

@@ -1,5 +1,5 @@
 import { cloneElement, useEffect, useId, useRef, useState, type ReactElement, type ReactNode } from 'react'
-import { IconPlayerPlay, IconRobot, IconDots, IconAlertCircle, IconFolder, IconFiles, IconFileZip, IconMicrophone, IconMicrophoneOff, IconPlayerStop, IconLoader, IconInbox, IconGitBranch, IconBriefcase, IconShieldCheck, IconUpload, IconTransform, IconFileCode, IconClipboardCheck, IconRefresh, IconSearch, IconSchema, IconTarget, IconTable, IconTemplate, IconCode, IconBox, IconListCheck, IconCertificate, IconDatabaseImport, IconPhoto, IconPencil, IconTrash, IconX, IconDeviceFloppy, IconCopy, IconCheck, IconThumbUp, IconThumbDown, IconPlus, IconPlayerStopFilled, IconFileText, IconSend, IconWorld, IconSpeakerphone, IconShare, IconAward, IconFilter, IconAddressBook, IconReportAnalytics, type TablerIcon } from '@tabler/icons-react'
+import { IconPlayerPlay, IconRobot, IconDots, IconAlertCircle, IconFolder, IconFiles, IconFileZip, IconMicrophone, IconMicrophoneOff, IconPlayerStop, IconLoader, IconInbox, IconGitBranch, IconBriefcase, IconShieldCheck, IconUpload, IconTransform, IconFileCode, IconClipboardCheck, IconRefresh, IconSearch, IconSchema, IconTarget, IconTable, IconTemplate, IconCode, IconBox, IconListCheck, IconCertificate, IconDatabaseImport, IconPhoto, IconPencil, IconTrash, IconX, IconDeviceFloppy, IconCopy, IconCheck, IconThumbUp, IconThumbDown, IconPlus, IconPlayerStopFilled, IconFileText, IconSend, IconWorld, IconSpeakerphone, IconShare, IconAward, IconFilter, IconAddressBook, IconReportAnalytics, IconUserCheck, IconHexagon, IconAlertTriangle, type TablerIcon } from '@tabler/icons-react'
 
 // ---- icons (inline, 16px, currentColor) --------------------------------------
 const paths: Record<string, ReactNode> = {
@@ -129,6 +129,9 @@ const tabler: Record<string, TablerIcon> = {
   'tb-filter': IconFilter,
   'tb-address-book': IconAddressBook,
   'tb-report-analytics': IconReportAnalytics,
+  'tb-user-check': IconUserCheck,
+  'tb-hexagon': IconHexagon,
+  'tb-alert-triangle': IconAlertTriangle,
 }
 
 export function Icon({ name, size = 16, spin, label, stroke }: { name: keyof typeof paths | string; size?: number; spin?: boolean; label?: string; stroke?: number }) {

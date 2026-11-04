@@ -13,8 +13,6 @@ export interface StageMeta {
   id: string
   /** Static requirement, shown while the stage has no live status. */
   needs: string
-  /** The human gate that applies to this stage. */
-  gate?: string
   /** Per-subskill gate notes, by subskill index. */
   subNotes?: Record<number, string>
   /** Locked until approval: shown with a lock and no live status. */
@@ -25,17 +23,17 @@ export interface StageMeta {
 
 /** Main new-part path, in order. 8D is reactive and is NOT part of it. */
 export const MAIN_PATH: StageMeta[] = [
-  { id: 'intake', needs: 'Start here', gate: 'Gaps halt only the affected drafts', subNotes: { 0: 'Add files above', 3: 'Never guess missing data' } },
-  { id: 'pfd', needs: 'Needs process data', gate: 'QE approval before PFMEA uses it' },
-  { id: 'pfmea', needs: 'Needs approved PFD', gate: 'Team S/O/D ratings, then QE review',
+  { id: 'intake', needs: 'Start here', subNotes: { 0: 'Add files above', 3: 'Never guess missing data' } },
+  { id: 'pfd', needs: 'Needs process data' },
+  { id: 'pfmea', needs: 'Needs approved PFD',
     subNotes: { 2: 'Runs before risk rating', 3: 'S/O/D from the team, never the AI' } },
-  { id: 'cp', needs: 'Needs approved PFMEA', gate: 'QE review before release', tag: 'Planned (P2)', subNotes: { 3: 'Flags orphaned risks / controls' } },
+  { id: 'cp', needs: 'Needs approved PFMEA', tag: 'Planned (P2)', subNotes: { 3: 'Flags orphaned risks / controls' } },
   { id: 'approval', needs: 'Release gate', locked: true, tag: 'Gate planned', subNotes: { 3: 'For updates after an 8D' } },
   { id: 'output', needs: 'Locked until approval', locked: true, subNotes: { 1: 'Ongoing, not only after export' } },
 ]
 /** Conditional branch: starts only when a complaint or internal failure needs it. */
 export const BRANCH: StageMeta[] = [
-  { id: '8d', needs: 'Starts on a complaint or internal failure', gate: 'Change approval for PFMEA / CP updates', tag: 'Planned (P2)' },
+  { id: '8d', needs: 'Starts on a complaint or internal failure', tag: 'Planned (P2)' },
 ]
 
 export interface StageView { status: StageStatus; label: string; subs?: Record<number, StageStatus> }
@@ -65,8 +63,8 @@ export function subSummary(total: number, subs?: Record<number, StageStatus>): s
   return subs && done ? `${done} of ${total} sub-skills complete` : `${total} sub-skills`
 }
 
-/** Collapsed line for a stage with no live status: "Waiting · 3 sub-skills" (gate / locked stages keep their own wording). */
-export const idleLine = (m: StageMeta, total: number) =>
-  ['pfd', 'pfmea', 'cp'].includes(m.id) ? `Waiting - ${total} sub-skills` : m.id === 'intake' ? `Ready - ${total} sub-skills` : m.id === '8d' ? `${m.needs} - ${total} sub-skills` : m.needs
+/** Collapsed line for a stage with no live status: "Waiting" (gate / locked stages keep their own wording). */
+export const idleLine = (m: StageMeta) =>
+  ['pfd', 'pfmea', 'cp'].includes(m.id) ? 'Waiting' : m.id === 'intake' ? 'Active' : m.needs
 
 export const FLOW = ['Intake', 'PFD', 'PFMEA', 'Control Plan', 'Approval', 'Output']

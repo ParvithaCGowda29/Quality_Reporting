@@ -28,7 +28,7 @@ export function LoginPage() {
             <img src={logo} alt="" width={68} height={68} className="login-logo" />
             <div>
               <BrandLockup className="login-lockup" />
-              <div className="login-product">Marketing workspace<span className="login-chip">BuLLMaps</span></div>
+              <div className="login-product">Quality Reporting workspace<span className="login-chip">BuLLMaps</span></div>
             </div>
           </div>
           <h1 className="login-title">Welcome back</h1>
