@@ -1,0 +1,19 @@
+{
+  "name": "bullm-quality-reporting-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BuLLM Quality Reporting Agent backend: intake, PFD, PFMEA, Control Plan, 8D, approval, output/audit for Innotech.",
+  "scripts": {
+    "dev": "node --experimental-strip-types --watch src/index.ts",
+    "start": "node --experimental-strip-types src/index.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  },
+  "engines": { "node": ">=22.6" },
+  "dependencies": {
+    "docx": "^9.5.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}
