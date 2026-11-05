@@ -1,13 +1,26 @@
 // Missing-Data Check (intake skill): the 19-item required-documents checklist agreed for
 // the Innotech pilot (reference workbook in the quality-workflow Drive).
+//
+// How an item becomes "present":
+//  - document items: an uploaded IntakeDocument whose `kind` matches (see KIND_BY_KEY).
+//    Upload each document with the matching kind. Specific template kinds
+//    (pfd-template, pfmea-template, cp-template, 8d-template) tick one template item;
+//    the generic kind `template` ticks all four (legacy behaviour).
+//  - process-data: automatically satisfied once at least one PFD operation exists for
+//    the project (e.g. captured by uploading the part's PFD Excel).
+//  - spoc / core-team: read from the project fields processOwner / coreTeam.
+//  - non-document confirmations (qe-review, scope-approval, sharepoint-route,
+//    approval-decision, change-approval): recorded explicitly via
+//    POST /api/intake/:pid/checklist/confirm { key, confirmed } - they are decisions
+//    and access grants, not files.
 import { db } from '../db.ts'
-import type { ChecklistItem, IntakeDocument } from '../types.ts'
+import type { ChecklistItem, IntakeDocument, PfdOperation, Project } from '../types.ts'
 
 const KIND_BY_KEY: Record<string, string[]> = {
-  'pfd-template': ['template'],
-  'pfmea-template': ['template'],
-  'cp-template': ['template'],
-  '8d-template': ['template'],
+  'pfd-template': ['template', 'pfd-template'],
+  'pfmea-template': ['template', 'pfmea-template'],
+  'cp-template': ['template', 'cp-template'],
+  '8d-template': ['template', '8d-template'],
   'sample-pfd': ['pfd'],
   'sample-pfmea': ['pfmea'],
   'sample-cp': ['control-plan'],
@@ -15,6 +28,9 @@ const KIND_BY_KEY: Record<string, string[]> = {
   'standards': ['standard'],
   'complaints': ['complaint'],
 }
+
+// Items confirmed manually (not documents).
+export const CONFIRMABLE_KEYS = ['qe-review', 'scope-approval', 'sharepoint-route', 'approval-decision', 'change-approval']
 
 export const CHECKLIST_DEF: { key: string; label: string; group: ChecklistItem['group'] }[] = [
   { key: 'pfd-template', label: 'PFD template (Innotech format)', group: 'templates' },
@@ -40,7 +56,9 @@ export const CHECKLIST_DEF: { key: string; label: string; group: ChecklistItem['
 
 export function evaluateChecklist(projectId: string): ChecklistItem[] {
   const docs = db.where<IntakeDocument>('documents', d => d.projectId === projectId)
-  const project = db.get<any>('projects', projectId)
+  const project = db.get<Project>('projects', projectId)
+  const confirmations = project?.confirmations ?? []
+  const opCount = db.where<PfdOperation>('operations', o => o.projectId === projectId).length
   return CHECKLIST_DEF.map(def => {
     let satisfied = false
     let evidence: string | undefined
@@ -48,13 +66,32 @@ export function evaluateChecklist(projectId: string): ChecklistItem[] {
     if (kinds) {
       const hit = docs.find(d => kinds.includes(d.kind))
       if (hit) { satisfied = true; evidence = `${def.label}: ${hit.filename}` }
+    }
+    if (def.key === 'process-data' && opCount > 0) {
+      satisfied = true; evidence = `${opCount} operations captured`
     } else if (def.key === 'spoc' && project?.processOwner) {
       satisfied = true; evidence = `SPOC: ${project.processOwner}`
     } else if (def.key === 'core-team' && project?.coreTeam?.length) {
       satisfied = true; evidence = `Core team: ${project.coreTeam.join(', ')}`
-    } else if (def.key === 'drawings' && docs.some(d => d.kind === 'other')) {
-      satisfied = true; evidence = 'Uploaded under kind=other'
+    } else if (def.key === 'drawings' && docs.some(d => d.kind === 'other' || d.kind === 'drawing')) {
+      const hit = docs.find(d => d.kind === 'other' || d.kind === 'drawing')
+      satisfied = true; evidence = `Uploaded: ${hit?.filename}`
+    }
+    if (!satisfied && CONFIRMABLE_KEYS.includes(def.key) && confirmations.includes(def.key)) {
+      satisfied = true; evidence = 'Confirmed by the quality manager'
     }
     return { ...def, satisfied, evidence }
   })
+}
+
+export function setConfirmation(projectId: string, key: string, confirmed: boolean): ChecklistItem[] {
+  if (!CONFIRMABLE_KEYS.includes(key)) {
+    throw Object.assign(new Error(`key must be one of: ${CONFIRMABLE_KEYS.join(', ')}`), { status: 400 })
+  }
+  const project = db.get<Project>('projects', projectId)
+  if (!project) throw Object.assign(new Error('project not found'), { status: 404 })
+  const set = new Set(project.confirmations ?? [])
+  confirmed ? set.add(key) : set.delete(key)
+  db.update<Project>('projects', projectId, { confirmations: [...set], updatedAt: new Date().toISOString() })
+  return evaluateChecklist(projectId)
 }
