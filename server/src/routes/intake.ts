@@ -6,7 +6,7 @@ import multer from 'multer'
 import { db } from '../db.ts'
 import { audit } from '../audit.ts'
 import { config } from '../config.ts'
-import { evaluateChecklist } from '../domain/checklist.ts'
+import { evaluateChecklist, setConfirmation } from '../domain/checklist.ts'
 import { addOperation } from '../domain/pfdEngine.ts'
 import { parseWorkbook } from '../intakeParse.ts'
 import { actor } from './projects.ts'
@@ -72,4 +72,13 @@ intake.get('/:projectId/checklist', (req, res) => {
   const items = evaluateChecklist(req.params.projectId)
   const missing = items.filter(i => !i.satisfied)
   res.json({ items, missing, halt: missing.length > 0, note: missing.length ? 'Missing-data check: halt and notify the quality manager on gaps.' : 'All required items present.' })
+})
+
+// Non-document checklist items (agreements, access grants) are confirmed explicitly.
+intake.post('/:projectId/checklist/confirm', (req, res, next) => {
+  try {
+    const items = setConfirmation(req.params.projectId, req.body?.key, req.body?.confirmed !== false)
+    audit(req.params.projectId, actor(req), 'intake.checklist-confirmed', `${req.body?.key}=${req.body?.confirmed !== false}`)
+    res.json({ items, missing: items.filter(i => !i.satisfied) })
+  } catch (e) { next(e) }
 })

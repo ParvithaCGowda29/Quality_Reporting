@@ -13,12 +13,13 @@ export interface Project {
   applicableStandards: string[] // e.g. ['IATF 16949', 'AIAG-VDA FMEA 2019']
   processOwner: string
   coreTeam: string[]
+  confirmations?: string[] // checklist keys confirmed manually (see domain/checklist.ts CONFIRMABLE_KEYS)
   status: 'intake' | 'pfd' | 'pfmea' | 'control-plan' | 'live'
   createdAt: string
   updatedAt: string
 }
 
-export type DocKind = 'pfd' | 'pfmea' | 'control-plan' | '8d' | 'template' | 'standard' | 'complaint' | 'other'
+export type DocKind = 'pfd' | 'pfmea' | 'control-plan' | '8d' | 'template' | 'pfd-template' | 'pfmea-template' | 'cp-template' | '8d-template' | 'standard' | 'complaint' | 'drawing' | 'other'
 
 export interface IntakeDocument {
   id: Id

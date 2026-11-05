@@ -22,7 +22,7 @@ Frontend: `npm run dev` at the repo root (port 5176) proxies `/api` to 8787
 | Skill | Endpoints |
 |---|---|
 | Projects | `POST/GET /projects`, `GET/PATCH /projects/:id` (GET embeds the 19-item checklist) |
-| Data Intake | `POST /intake/:pid/documents` (multipart upload, scan policy, auto-parse Innotech PFD/PFMEA Excel into process data), `GET /intake/:pid/documents`, `GET /intake/:pid/checklist` (missing-data halt) |
+| Data Intake | `POST /intake/:pid/documents` (multipart upload, scan policy, auto-parse Innotech PFD/PFMEA Excel into process data), `GET /intake/:pid/documents`, `GET /intake/:pid/checklist` (missing-data halt), `POST /intake/:pid/checklist/confirm` `{key, confirmed}` for the 5 non-document items (qe-review, scope-approval, sharepoint-route, approval-decision, change-approval) |
 | PFD | `POST /pfd/:pid/operations` (auto op number + classification), `GET /pfd/:pid/operations` |
 | PFMEA | `POST /pfmea/:pid/draft` (one row group per PFD operation; runs IATF 16949 check BEFORE rating review, per the agreed skills doc), `GET /pfmea/:pid/rows`, `PATCH /pfmea/rows/:rowId` (recomputes RPN + AIAG-VDA AP), `GET /pfmea/:pid/actions` (H-AP items), `GET /pfmea/:pid/iatf-check` |
 | Control Plan | `POST /control-plan/:pid/draft` (PFMEA+PFD mapping, reaction plans), `GET/PATCH .../rows`, `GET /control-plan/:pid/consistency` (two-way PFMEA<->control check) |
@@ -49,10 +49,13 @@ Acting QE identity goes in the `x-qe-name` header (recorded in approvals and the
    (rev no + date) and every draft/edit/rating/approval writes an audit record.
 6. **Branding**: Innotech + DigiBull logos (from the quality-workflow Drive) are bundled
    in `server/assets/` and embedded in every exported document.
-7. **Intake parser is header-driven** against Innotech's real file layout - verified on
+8. **Checklist semantics**: document items tick by upload `kind` (specific template kinds tick one item; generic `template` ticks all four); `process-data` ticks automatically once PFD operations exist; the 5 agreement/access items confirm via the endpoint above.
+9. **Intake parser is header-driven** against Innotech's real file layout - verified on
    their 20-operation 2.7KW AMP cable PFD (all 20 operations captured).
 
 ## Known gaps / next steps
+
+- UI should offer the upload kind select (incl. pfd-template / pfmea-template / cp-template / 8d-template / drawing) and a confirm control for the 5 non-document checklist items.
 
 - Wire the UI's assistant router and Results pane to `src/api/client.ts` (client is ready).
 - Virus scan is a policy stub (blocks executables); hook ClamAV or a cloud scanner.
